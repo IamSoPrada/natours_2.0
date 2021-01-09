@@ -1,6 +1,11 @@
 const fs = require("fs")
 const express = require('express')
+const morgan = require('morgan')
 const app = express()
+
+// 1) Middlewares
+app.use(morgan('dev ')) //3rd party мидлвар который возвращает функцию логгер в консоль где видно http метод,
+// путь (route), статус код и время в мс 
 
 app.use(express.json()) // мидл вар который обрабатывает наш запрос (req)
 
@@ -20,6 +25,7 @@ app.use((req, res, next) => {
 const tours = JSON.parse(
     fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
 )
+// 2) Routes handlers
 
 const getAllTours = (req, res) => {
     console.log(req.requestTime)
@@ -105,6 +111,8 @@ const deleteTour = (req, res) => {
 
 // app.delete('/api/v1/tours/:id', deleteTour)
 
+
+// 3)Routes 
 app.route('/api/v1/tours')
     .get(getAllTours)
     .post(createTour)
@@ -114,7 +122,7 @@ app.route('/api/v1/tours/:id')
     .patch(updateTour)
     .delete(deleteTour)
 
-
+// 4) Start serber
 const port = 3000
 app.listen(port, () => {
     console.log(`App running on port ${port}`)
