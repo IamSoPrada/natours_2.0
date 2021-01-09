@@ -4,11 +4,17 @@ const app = express()
 
 app.use(express.json()) // мидл вар который обрабатывает наш запрос (req)
 
-
 app.use((req, res, next) => {
 
     console.log('Hello from the middleware!')
     next()
+})
+
+app.use((req, res, next) => {
+    req.requestTime = new Date().toISOString()
+    next()
+    // к поступающему запросу в этом мидлваре мы как бы добавили св-во requestTime
+    // которое вызываем в методе getAllTours
 })
 
 const tours = JSON.parse(
@@ -16,8 +22,10 @@ const tours = JSON.parse(
 )
 
 const getAllTours = (req, res) => {
+    console.log(req.requestTime)
     res.status(200).json({
         status: 'Success',
+        requestedAt: req.requestTime,
         results: tours.length,
         data: {
             tours
