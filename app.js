@@ -101,31 +101,31 @@ const deleteTour = (req, res) => {
     })
 }
 
-const getAllUsers = (req, res)=> {
+const getAllUsers = (req, res) => {
     res.status(500).json({
         status: 'error',
         message: 'This route not yet defined'
     })
 }
-const getUser = (req, res)=> {
+const getUser = (req, res) => {
     res.status(500).json({
         status: 'error',
         message: 'This route not yet defined'
     })
 }
-const createUser = (req, res)=> {
+const createUser = (req, res) => {
     res.status(500).json({
         status: 'error',
         message: 'This route not yet defined'
     })
 }
-const updateUser = (req, res)=> {
+const updateUser = (req, res) => {
     res.status(500).json({
         status: 'error',
         message: 'This route not yet defined'
     })
 }
-const deleteUser = (req, res)=> {
+const deleteUser = (req, res) => {
     res.status(500).json({
         status: 'error',
         message: 'This route not yet defined'
@@ -143,24 +143,31 @@ const deleteUser = (req, res)=> {
 // app.delete('/api/v1/tours/:id', deleteTour)
 
 
-// 3)Routes 
-app.route('/api/v1/tours')
+// 3)Routes
+
+const tourRouter = express.Router() // создали отдельные раутеры для туров и пользователей
+const userRouter = express.Router()
+
+tourRouter.route('/')
     .get(getAllTours)
     .post(createTour)
 
-app.route('/api/v1/tours/:id')
+tourRouter.route('/:id')
     .get(getTour)
     .patch(updateTour)
     .delete(deleteTour)
 
-app.route('/api/v1/users')
+userRouter.route('/')
     .get(getAllUsers)
     .post(createUser)
 
-app.route('/api/v1/users/:id')
+userRouter.route('/:id')
     .get(getUser)
     .patch(updateUser)
     .delete(deleteUser)
+
+app.use('/api/v1/tours', tourRouter)
+app.use('/api/v1/users', userRouter)
 
 // 4) Start serber
 const port = 3000
