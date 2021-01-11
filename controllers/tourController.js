@@ -3,6 +3,7 @@ const fs = require("fs")
 const tours = JSON.parse(
     fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`)
 )
+
 exports.checkID = (req, res, next, val) => { // мидлвар ф-ция проверяет валидность id до того как достигнет контроллера
     console.log(`Tour id is : ${val}`)
     if (req.params.id * 1 > tours.length) {
@@ -14,6 +15,15 @@ exports.checkID = (req, res, next, val) => { // мидлвар ф-ция про�
     next()
 }
 
+exports.checkBody = (req, res, next) => {
+    if (!req.body.name || !req.body.price) {
+        return res.status(404).json({
+            status: 'fail',
+            message: 'Missing name or price'
+        })
+    }
+    next()
+}
 
 exports.getAllTours = (req, res) => {
     console.log(req.requestTime)
@@ -56,7 +66,7 @@ exports.createTour = (req, res) => {
 }
 
 exports.updateTour = (req, res) => {
-  
+
     res.status(200).json({
         status: "success",
         data: {
