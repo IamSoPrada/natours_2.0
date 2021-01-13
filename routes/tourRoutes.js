@@ -8,7 +8,7 @@ const router = express.Router(); // создали отдельные рауте
 //    next()
 //}) // когда мы поступает запрос содержащий доп.параметры например id тура, мы можем воспользоваться мидлваром чтобы получить у нему доступ через метод params. Тк это мидлвар нельзя забывать про ф-цию next() иначе req-res цикл застрянет
 
-router.param('id', tourController.checkID);
+/* router.param('id', tourController.checkID); */
 
 router
   .route('/')
