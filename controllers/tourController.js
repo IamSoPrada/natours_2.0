@@ -16,7 +16,7 @@ const Tour = require('./../models/tourModel');
   next();
 }; */
 
-exports.checkBody = (req, res, next) => {
+/* exports.checkBody = (req, res, next) => {
   if (!req.body.name || !req.body.price) {
     return res.status(404).json({
       status: 'fail',
@@ -25,7 +25,7 @@ exports.checkBody = (req, res, next) => {
   }
   next();
 };
-
+ */
 exports.getAllTours = (req, res) => {
   console.log(req.requestTime);
   res.status(200).json({
@@ -49,9 +49,10 @@ exports.getTour = (req, res) => {
     }
   }); */
 };
-exports.createTour = (req, res) => {
-  /*     console.log(req.body) // св-во body доступно нам тк мы используем мидлвар выше */
-  /*   const newId = tours[tours.length - 1].id + 1;
+exports.createTour = async (req, res) => {
+  try {
+    /*     console.log(req.body) // св-во body доступно нам тк мы используем мидлвар выше */
+    /*   const newId = tours[tours.length - 1].id + 1;
   const newTour = Object.assign({ id: newId }, req.body);
   tours.push(newTour);
   fs.writeFile(
@@ -66,14 +67,25 @@ exports.createTour = (req, res) => {
       });
     }
   ); */
-  /*     res.send('done') // необходимо отправить в ответ что-то, чтобы завершить req-res цикл */
+    /*     res.send('done') // необходимо отправить в ответ что-то, чтобы завершить req-res цикл */
 
-  res.status(201).json({
-    status: 'success'
-    /* data: {
-      tour: newTour
-    } */
-  });
+    /*   const newTour = new Tour({})
+  newTour.save() */
+
+    const newTour = await Tour.create(req.body);
+
+    res.status(201).json({
+      status: 'success',
+      data: {
+        tour: newTour
+      }
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: 'fail',
+      message: 'Invalid data sent'
+    });
+  }
 };
 
 exports.updateTour = (req, res) => {
