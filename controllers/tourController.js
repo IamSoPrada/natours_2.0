@@ -26,21 +26,27 @@ const Tour = require('./../models/tourModel');
   next();
 };
  */
-exports.getAllTours = (req, res) => {
-  console.log(req.requestTime);
-  res.status(200).json({
-    status: 'Success',
-    requestedAt: req.requestTime
-    /* results: tours.length,
-    data: {
-      tours
-    } */
-  });
+exports.getAllTours = async (req, res) => {
+  try {
+    const tours = await Tour.find(); // запрашиваем ВСЕ документы из бд в массиве
+    res.status(200).json({
+      status: 'Success',
+      results: tours.length,
+      data: {
+        tours
+      }
+    });
+  } catch (err) {
+    res.status(404).json({
+      status: 'Fail',
+      message: err
+    });
+  }
 };
 
-exports.getTour = (req, res) => {
-  console.log(req.params); // здесь дуступны наши переменные которые мы отправляем в запросе :id и  : fye
-  const id = req.params.id * 1;
+exports.getTour = async (req, res) => {
+  //console.log(req.params); // здесь дуступны наши переменные которые мы отправляем в запросе :id и  : fye
+  //const id = req.params.id * 1;
   /*  const tour = tours.find(el => el.id === id);
   res.status(200).json({
     status: 'Success',
@@ -48,7 +54,25 @@ exports.getTour = (req, res) => {
       tour
     }
   }); */
+
+  try {
+    const { id } = req.params;
+    const tour = await Tour.findById(id); // метод из мангуса
+    // Tour.findOne({ _id: req.params.id }); тоже самое
+    res.status(200).json({
+      status: 'Success',
+      data: {
+        tour
+      }
+    });
+  } catch (err) {
+    res.status(404).json({
+      status: 'Fail',
+      message: err
+    });
+  }
 };
+
 exports.createTour = async (req, res) => {
   try {
     /*     console.log(req.body) // св-во body доступно нам тк мы используем мидлвар выше */
@@ -70,7 +94,7 @@ exports.createTour = async (req, res) => {
     /*     res.send('done') // необходимо отправить в ответ что-то, чтобы завершить req-res цикл */
 
     /*   const newTour = new Tour({})
-  newTour.save() */
+          newTour.save() */
 
     const newTour = await Tour.create(req.body);
 
@@ -88,18 +112,37 @@ exports.createTour = async (req, res) => {
   }
 };
 
-exports.updateTour = (req, res) => {
-  res.status(200).json({
-    status: 'success',
-    data: {
-      tour: '<Updated tour here...></Updated>'
-    }
-  });
+exports.updateTour = async (req, res) => {
+  try {
+    const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
+      new: true, // доп. условия переписывают пред. данные в бд
+      runValidators: true
+    });
+    res.status(200).json({
+      status: 'success',
+      data: {
+        tour
+      }
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: 'fail',
+      message: err
+    });
+  }
 };
 
-exports.deleteTour = (req, res) => {
-  res.status(204).json({
-    status: 'success',
-    data: null
-  });
+exports.deleteTour = async (req, res) => {
+  try {
+    await Tour.findByIdAndDelete(req.params.id);
+    res.status(204).json({
+      status: 'success',
+      data: null
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: 'fail',
+      message: err
+    });
+  }
 };
