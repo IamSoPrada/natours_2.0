@@ -28,7 +28,33 @@ const Tour = require('./../models/tourModel');
  */
 exports.getAllTours = async (req, res) => {
   try {
-    const tours = await Tour.find(); // запрашиваем ВСЕ документы из бд в массиве
+    // "Формируем запрос"
+    // Фильтрация
+    const queryObj = { ...req.query };
+    const excludedFields = ['page', 'sort', 'limit', 'fields']; // поля которые мы не хотим чтоб были в запросе
+    excludedFields.forEach(el => delete queryObj[el]); // удаляем их
+    //console.log(req.query, queryObj);
+
+    // Продвинутая фильтрация
+    let queryStr = JSON.stringify(queryObj);
+    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`);
+    console.log(JSON.parse(queryStr));
+    console.log(req.query);
+    // {difficulty: 'easy', duration: {$gte: 5}}
+
+    //const tours = await Tour.find()
+    //  .where('duration')
+    //  .equals(5)
+    //  .where('difficulty')
+    //  .equals('easy');
+
+    const query = Tour.find(JSON.parse(queryStr)); // запрашиваем ВСЕ документы из бд в массиве
+    // Совершаем запрос
+
+    const tours = await query;
+
+    // Отправляем ответ
+
     res.status(200).json({
       status: 'Success',
       results: tours.length,
