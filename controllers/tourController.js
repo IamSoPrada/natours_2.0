@@ -48,7 +48,38 @@ exports.getAllTours = async (req, res) => {
     //  .where('difficulty')
     //  .equals('easy');
 
-    const query = Tour.find(JSON.parse(queryStr)); // запрашиваем ВСЕ документы из бд в массиве
+    let query = Tour.find(JSON.parse(queryStr)); // запрашиваем ВСЕ документы из бд в массиве
+
+    // Сортировка(по цене по возрастанию)
+
+    if (req.query.sort) {
+      const sortBy = req.query.sort.split(',').join(' ');
+      //console.log(sortBy);
+      query = query.sort(sortBy);
+    } else {
+      query = query.sort('-createdAt');
+    }
+
+    // Ограничение по поиску по полям (какие поля будут показаны)
+
+    if (req.query.fields) {
+      const fields = req.query.fields.split(',').join(' ');
+      query = query.select(fields);
+    } else {
+      query = query.select('-__v');
+    }
+
+    // Пагинация
+    //page=2&limit=10
+    const page = req.query.page * 1 || 1;
+    const limit = req.query.limit * 1 || 100;
+    const skip = (page - 1) * limit;
+    query = query.skip(skip).limit(limit);
+
+    if (req.query.page) {
+      const numTours = await Tour.countDocuments();
+      if (skip >= numTours) throw new Error('This page does not exist');
+    }
     // Совершаем запрос
 
     const tours = await query;
