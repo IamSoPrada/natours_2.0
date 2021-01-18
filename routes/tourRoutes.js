@@ -11,6 +11,10 @@ const router = express.Router(); // создали отдельные рауте
 /* router.param('id', tourController.checkID); */
 
 router
+  .route('/top-5-tours')
+  .get(tourController.aliasTopTours, tourController.getAllTours);
+
+router
   .route('/')
   .get(tourController.getAllTours)
   .post(/* tourController.checkBody, */ tourController.createTour);
