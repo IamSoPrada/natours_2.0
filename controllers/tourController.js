@@ -1,4 +1,5 @@
 const Tour = require('./../models/tourModel');
+const APIFeatures = require('./../utils/apiFeatures');
 
 exports.aliasTopTours = (req, res, next) => {
   req.query.limit = '5';
@@ -37,16 +38,16 @@ exports.getAllTours = async (req, res) => {
   try {
     // "Формируем запрос"
     // Фильтрация
-    const queryObj = { ...req.query };
-    const excludedFields = ['page', 'sort', 'limit', 'fields']; // поля которые мы не хотим чтоб были в запросе
-    excludedFields.forEach(el => delete queryObj[el]); // удаляем их
+    //const queryObj = { ...req.query };
+    //const excludedFields = ['page', 'sort', 'limit', 'fields']; // поля которые мы не хотим чтоб были в запросе
+    //excludedFields.forEach(el => delete queryObj[el]); // удаляем их
     //console.log(req.query, queryObj);
 
     // Продвинутая фильтрация
-    let queryStr = JSON.stringify(queryObj);
-    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`);
-    console.log(JSON.parse(queryStr));
-    console.log(req.query);
+    // let queryStr = JSON.stringify(queryObj);
+    // queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`);
+    // console.log(JSON.parse(queryStr));
+    // console.log(req.query);
     // {difficulty: 'easy', duration: {$gte: 5}}
 
     //const tours = await Tour.find()
@@ -55,30 +56,30 @@ exports.getAllTours = async (req, res) => {
     //  .where('difficulty')
     //  .equals('easy');
 
-    let query = Tour.find(JSON.parse(queryStr)); // запрашиваем ВСЕ документы из бд в массиве
+    // let query = Tour.find(JSON.parse(queryStr)); // запрашиваем ВСЕ документы из бд в массиве
 
     // Сортировка(по цене по возрастанию)
 
-    if (req.query.sort) {
+    /*     if (req.query.sort) {
       const sortBy = req.query.sort.split(',').join(' ');
       //console.log(sortBy);
       query = query.sort(sortBy);
     } else {
       query = query.sort('-createdAt');
-    }
+    } */
 
     // Ограничение по поиску по полям (какие поля будут показаны)
 
-    if (req.query.fields) {
+    /*     if (req.query.fields) {
       const fields = req.query.fields.split(',').join(' ');
       query = query.select(fields);
     } else {
       query = query.select('-__v');
-    }
+    } */
 
     // Пагинация
     //page=2&limit=10
-    const page = req.query.page * 1 || 1;
+    /*     const page = req.query.page * 1 || 1;
     const limit = req.query.limit * 1 || 100;
     const skip = (page - 1) * limit;
     query = query.skip(skip).limit(limit);
@@ -86,13 +87,19 @@ exports.getAllTours = async (req, res) => {
     if (req.query.page) {
       const numTours = await Tour.countDocuments();
       if (skip >= numTours) throw new Error('This page does not exist');
-    }
+    } */
+
     // Совершаем запрос
 
-    const tours = await query;
+    const features = new APIFeatures(Tour.find(), req.query)
+      .filter()
+      .sort()
+      .limitFields()
+      .paginate();
+
+    const tours = await features.query;
 
     // Отправляем ответ
-
     res.status(200).json({
       status: 'Success',
       results: tours.length,
