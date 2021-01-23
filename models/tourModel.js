@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
+const validator = require('validator');
 
 const tourSchema = new mongoose.Schema(
   {
@@ -10,6 +11,7 @@ const tourSchema = new mongoose.Schema(
       trim: true,
       maxLength: [40, 'A tour name must have less or equal then 40 characters'],
       minLength: [10, 'A tour name must have more or equal then 10 characters']
+      //validate: [validator.isAlpha, 'Tour name must only contain characters'] не пропускает пробелы(
     },
     slug: String,
     duration: {
@@ -43,7 +45,16 @@ const tourSchema = new mongoose.Schema(
       type: Number,
       required: [true, 'A tour must have a price']
     },
-    priceDiscount: Number,
+    priceDiscount: {
+      type: Number,
+      validate: {
+        validator: function(val) {
+          //this only points to current doc on NEW documents creation
+          return val < this.price; // если дисконт больше то вернет ошибка
+        },
+        message: 'Discount price {{VALUE}} should be below regular price'
+      }
+    },
     summary: {
       type: String,
       trim: true,
@@ -80,7 +91,7 @@ tourSchema.virtual('durationWeeks').get(function() {
 }); // виртуальные свойства, их можно сгенерировать сразу как только подключились к бд
 // будет работать на GET запрос
 
-// DOCUMENT MIDDLEWARE выполняется перед .save() и .create()
+// DOCUMENT MIDDLEWARE выполняется только перед .save() и .create() но не для Update
 tourSchema.pre('save', function(next) {
   //console.log(this); // в консоли будет документ перед отправкой в бд при POST запросе
   this.slug = slugify(this.name, { lower: true });
