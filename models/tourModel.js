@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const slugify = require('slugify');
 
 const tourSchema = new mongoose.Schema(
   {
@@ -8,6 +9,7 @@ const tourSchema = new mongoose.Schema(
       unique: true,
       trim: true
     },
+    slug: String,
     duration: {
       type: Number,
       required: [true, 'A tour must have a duration']
@@ -65,6 +67,22 @@ tourSchema.virtual('durationWeeks').get(function() {
 }); // виртуальные свойства, их можно сгенерировать сразу как только подключились к бд
 // будет работать на GET запрос
 
+// DOCUMENT MIDDLEWARE выполняется перед .save() и .create()
+tourSchema.pre('save', function(next) {
+  //console.log(this); // в консоли будет документ перед отправкой в бд при POST запросе
+  this.slug = slugify(this.name, { lower: true });
+  next();
+});
+
+/* tourSchema.pre('save', function(next) {
+  console.log('Will save document...');
+  next();
+});
+
+tourSchema.post('save', function(doc, next) {
+  console.log(doc);
+  next();
+}); */
 
 const Tour = mongoose.model('Tour', tourSchema);
 
