@@ -14,7 +14,8 @@ mongoose // подключаем к онлайн бд через монгус(с
     // метод коннект возвращает промис
     useNewUrlParser: true,
     useCreateIndex: true,
-    useFindAndModify: false
+    useFindAndModify: false,
+    useUnifiedTopology: true
   })
   .then(() => {
     console.log('DB connection successfull');
@@ -22,7 +23,7 @@ mongoose // подключаем к онлайн бд через монгус(с
 
 //console.log(app.get('env'))
 
-//console.log(process.env)
+//console.log(process.env);
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
