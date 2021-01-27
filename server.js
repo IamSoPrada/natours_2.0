@@ -26,6 +26,15 @@ mongoose // подключаем к онлайн бд через монгус(с
 //console.log(process.env);
 
 const port = process.env.PORT || 3000;
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`App running on port ${port}`);
+});
+
+process.on('unhandledRejection', err => {
+  console.log(err.name, err.message);
+  console.log('UNHANDLED REJECTION! Shutting down');
+  server.close(() => {
+    // таким образом мы обрубаем все запрусы идущие или происходящие в текущий момент
+    process.exit(1);
+  });
 });
