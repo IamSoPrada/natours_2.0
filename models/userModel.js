@@ -20,7 +20,8 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: [true, 'Please provide your password'],
-    minLength: 8
+    minLength: 8,
+    select: false // Это поле позволяет скрыть его для выдачи на клиент на output
   },
   passwordConfirm: {
     type: String,
@@ -37,11 +38,18 @@ const userSchema = new mongoose.Schema({
 //Чтобы зашифровать пароль юзера мы используем хук pre т.к для зашифровать пароль мы должны еще до сохранения переданных данный в бд.
 //Эта функция будет работать только если именно пароль был измененб если нет то выход
 userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next();
+  if (!this.isModified('password')) return next(); // this ссылается на текущий документ
   this.password = await bcrypt.hash(this.password, 12); // возвращает промис // число это cost cpu сколько будет затрачено ресурсов для шифрования..
   this.passwordConfirm = undefined; // само поле с подверждением пароля необходимо только для валидации. Поэтому после валидации мы его удалем таким образомю
   next();
 });
+
+userSchema.methods.correctPassword = async function(
+  candidatePassword,
+  userPassword
+) {
+  return await bcrypt.compare(candidatePassword, userPassword);
+};
 
 const User = mongoose.model('User', userSchema);
 
