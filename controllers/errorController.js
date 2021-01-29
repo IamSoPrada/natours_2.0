@@ -27,6 +27,11 @@ const sendErrorDev = (err, res) => {
   });
 };
 
+const handleJWTError = () =>
+  new AppError('Invalid token. Please log in again', 401);
+const handleJWTExpiredError = () =>
+  new AppError('Your token has expired. Please log in again', 401);
+
 //Ошибки на этапе production мы разделяем на операционныеб которые мы знаем и предусмотрели в наших контроллерах и ошибки которые мы не ожидали
 // Операционные : пользователь пытается пройти по ссылке которая не существует, неправильные тип данных и т.д
 
@@ -66,6 +71,9 @@ module.exports = (err, req, res, next) => {
     if (error.name === 'CastError') error = handleCastErrorDB(error);
     if (error.code === 11000) error = handleDuplicateFieldsDB(error);
     if (error.name === 'ValidatorError') error = handleValidationErrorDB(error);
+    if (error.name === 'JsonWebTokenError') error = handleJWTError(error);
+    if (error.name === 'TokenExpiredError')
+      error = handleJWTExpiredError(error);
     sendErrorProd(error, res);
   }
 };

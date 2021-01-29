@@ -26,6 +26,8 @@ app.use(express.static(`${__dirname}/public`)); // 66 урок как смотр
 
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
+  //console.log(req.headers);
+
   next();
   // к поступающему запросу в этом мидлваре мы как бы добавили св-во requestTime
   // которое вызываем в методе getAllTours
