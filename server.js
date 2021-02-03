@@ -40,7 +40,7 @@ process.on('unhandledRejection', err => {
   console.log(err.name, err.message); //.name, err.message);
 
   server.close(() => {
-    // таким образом мы обрубаем все запрусы идущие или происходящие в текущий момент
+    // таким образом мы обрубаем все запросы идущие или происходящие в текущий момент
     process.exit(1);
   });
 });
