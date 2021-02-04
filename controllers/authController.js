@@ -12,6 +12,18 @@ const signToken = id => {
   });
 };
 
+const createSendToken = (user, statusCode, res) => {
+  const token = signToken(user._id);
+
+  res.status(statusCode).json({
+    status: 'success',
+    token,
+    data: {
+      user
+    }
+  });
+};
+
 exports.signup = catchAsync(async (req, res, next) => {
   // const newUser = await User.create({req.body}); // такая запись неправильная т.к берет и записывает данные из пост запроса из body.
   //Это дает возможность создать пользователя с правами администратора, ниже запись правильная
@@ -26,15 +38,7 @@ exports.signup = catchAsync(async (req, res, next) => {
     passwordResetExpires: req.body.passwordResetExpires
   }); // возвращает промис
 
-  const token = signToken(newUser._id);
-
-  res.status(201).json({
-    stasus: 'success',
-    token,
-    data: {
-      user: newUser
-    }
-  });
+  createSendToken(newUser, 201, res);
 });
 
 exports.login = catchAsync(async (req, res, next) => {
@@ -50,11 +54,7 @@ exports.login = catchAsync(async (req, res, next) => {
     return next(new AppError('Incorrect email or password', 401));
   }
   // Если все норм то отсылаем токен на клиент
-  const token = signToken(user._id);
-  res.status(200).json({
-    status: 'success',
-    token
-  });
+  createSendToken(user, 200, res);
 });
 
 exports.protect = catchAsync(async (req, res, next) => {
@@ -168,10 +168,22 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   // 3) Обноваить changedPasswordAt свойство в бд
 
   // 4) Залогинить пользователя, отправить JWT
-  const token = signToken(user._id);
+  createSendToken(user, 200, res);
+});
 
-  res.status(200).json({
-    status: 'success',
-    token
-  });
+exports.updatePassword = catchAsync(async (req, res, next) => {
+  // 1) Получить пользователя с бд
+  const user = await User.findById(req.user.id).select('+password');
+  // 2) Проверить отправленный пароль правильный ли он
+  if (!(await user.correctPassword(req.body.passwordCurrent, user.password))) {
+    return next(new AppError('Your current password is wrong', 401));
+  }
+  // 3) Если все ок, то обновить его
+
+  user.password = req.body.password;
+  user.passwordConfirm = req.body.passwordConfirm;
+  await user.save();
+  // User.findByIdAndUpdate WILL NOT work as intended!!!
+  //4) Залогинить пользователя и отправить JWT
+  createSendToken(user, 200, res);
 });
