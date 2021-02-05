@@ -59,7 +59,12 @@ const userSchema = new mongoose.Schema({
     type: Date
   },
   passwordResetToken: String,
-  passwordResetExpires: Date
+  passwordResetExpires: Date,
+  active: {
+    type: Boolean,
+    default: true,
+    select: false
+  }
 });
 
 //Чтобы зашифровать пароль юзера мы используем хук pre т.к для зашифровать пароль мы должны еще до сохранения переданных данный в бд.
@@ -77,6 +82,12 @@ userSchema.pre('save', function(next) {
   next();
 });
 
+userSchema.pre(/^find/, function(next) {
+  // Это будет рабоатть с ТЕКУЩИМ запросом начинающимся на find
+  this.find({ active: { $ne: false } });
+  next();
+  //т.е показаны те у кого false показаны не будут
+});
 userSchema.methods.correctPassword = async function(
   candidatePassword,
   userPassword
