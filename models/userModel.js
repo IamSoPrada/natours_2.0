@@ -86,7 +86,8 @@ userSchema.pre(/^find/, function(next) {
   // Это будет рабоатть с ТЕКУЩИМ запросом начинающимся на find
   this.find({ active: { $ne: false } });
   next();
-  //т.е показаны те у кого false показаны не будут
+  //т.е показаны те у кого active: trued
+  //
 });
 userSchema.methods.correctPassword = async function(
   candidatePassword,
