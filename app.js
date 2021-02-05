@@ -1,5 +1,6 @@
 const express = require('express');
 const morgan = require('morgan');
+const rateLimit = require('express-rate-limit');
 
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
@@ -8,13 +9,18 @@ const userRouter = require('./routes/userRoutes');
 
 const app = express();
 
-// 1) Middlewares
+// 1) Global Middlewares
 //console.log(process.env.NODE_ENV);
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev')); //3rd party мидлвар который возвращает функцию логгер в консоль где видно http метод,
   // путь (route), статус код и время в мс
 }
-
+const limiter = rateLimit({
+  max: 1, // Максимум 100 запросов с одного айпи
+  windowMs: 60 * 60 * 1000, // 1 час
+  message: 'Too many requsets from this IP, please try again in an hour'
+});
+app.use('/api', limiter);
 app.use(express.json()); // мидл вар который обрабатывает наш запрос (req)
 
 app.use(express.static(`${__dirname}/public`)); // 66 урок как смотреть статик файлы
