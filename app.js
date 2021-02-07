@@ -2,6 +2,9 @@ const express = require('express');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
+const mongoSanitize = require('express-mongo-sanitize');
+const xss = require('xss-clean');
+const hpp = require('hpp');
 
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
@@ -24,7 +27,7 @@ if (process.env.NODE_ENV === 'development') {
 
 //ограничивание кол-ва запросов с 1 айпи
 const limiter = rateLimit({
-  max: 1, // Максимум 100 запросов с одного айпи
+  max: 100, // Максимум 100 запросов с одного айпи
   windowMs: 60 * 60 * 1000, // 1 час
   message: 'Too many requsets from this IP, please try again in an hour'
 });
@@ -32,6 +35,26 @@ app.use('/api', limiter);
 
 //Body parser,reading data body into req.body
 app.use(express.json({ limit: '10kb' })); // мидл вар который обрабатывает наш запрос (req)
+
+// Data sanitization against NoSQL query injection
+app.use(mongoSanitize()); //убирает знаки доллара и точки из запроса
+
+// Data senitization against XSS
+app.use(xss()); // конвертирует html и отсеивает подобные атаки
+
+//Prevent parameter pollution (когда в запросе поля поступают в массиве [price, duration] урок 145)
+app.use(
+  hpp({
+    whiteList: [
+      'duration',
+      'ratingQuantity',
+      'ratingAverage',
+      'difficulty',
+      'maxGroupSize',
+      'price'
+    ]
+  })
+); //будет сортировать по последнему полю sort из запроса
 
 //Serving static files
 app.use(express.static(`${__dirname}/public`)); // 66 урок как смотреть статик файлы
