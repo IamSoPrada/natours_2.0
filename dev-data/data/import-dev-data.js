@@ -23,9 +23,7 @@ mongoose // подключаем к онлайн бд через монгус(с
 
 //Читаем файл
 
-const tours = JSON.parse(
-  fs.readFileSync(`${__dirname}/tours-simple.json`, 'utf-8')
-);
+const tours = JSON.parse(fs.readFileSync(`${__dirname}/tours.json`, 'utf-8'));
 
 // Импортируем данные в бд
 
